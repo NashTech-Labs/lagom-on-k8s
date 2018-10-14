@@ -17,9 +17,10 @@ public final class MenuModule extends AbstractModule implements ServiceGuiceSupp
     protected void configure() {
         bindService(MenuService.class, MenuServiceImpl.class);
         bind(AkkaManagerAndClusterStart.class).asEagerSingleton();
+        bind(MenuEventProcessor.class);
     }
 
-    class AkkaManagerAndClusterStart {
+    static class AkkaManagerAndClusterStart {
         @Inject
         public AkkaManagerAndClusterStart(final Application application, final ActorSystem actorSystem) {
             if(application.isProd()) {
