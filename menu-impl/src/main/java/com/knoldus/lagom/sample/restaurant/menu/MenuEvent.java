@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2018 Knoldus Inc. <https://www.knoldus.com/home.knol>
+ */
 package com.knoldus.lagom.sample.restaurant.menu;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -9,6 +12,7 @@ import com.lightbend.lagom.serialization.CompressedJsonable;
 import com.lightbend.lagom.serialization.Jsonable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 
 public interface MenuEvent extends Jsonable, AggregateEvent<MenuEvent> {
 
@@ -24,6 +28,7 @@ public interface MenuEvent extends Jsonable, AggregateEvent<MenuEvent> {
     /**
      * Event generated when an Item gets added to Menu.
      */
+    @Getter
     @Builder
     @JsonDeserialize
     @AllArgsConstructor
