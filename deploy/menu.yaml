@@ -1,0 +1,48 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: menu
+  labels:
+    app: menu
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: menu
+    spec:
+      containers:
+      - image: "menu-impl:latest"
+        imagePullPolicy: IfNotPresent
+        name: menu
+        ports:
+        - containerPort: 9000
+        - containerPort: 10001
+          name: "akka-remote"
+        - containerPort: 10002
+          name: "akka-mgmt-http"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: menu
+  labels:
+    app: menu
+spec:
+  ports:
+  - name: "http"
+    port: 9000
+    nodePort: 31001
+    targetPort: 9000
+  - name: "akka-remote"
+    port: 10001
+    protocol: TCP
+    targetPort: 10001
+  - name: "akka-mgmt-http"
+    port: 10002
+    protocol: TCP
+    targetPort: 10002
+  selector:
+    app: menu
+  type: NodePort

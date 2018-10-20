@@ -48,6 +48,33 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+        <!-- akka management (cluster formation) -->
+        <dependency>
+            <groupId>com.lightbend.akka.management</groupId>
+            <artifactId>akka-management_${scala.binary.version}</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.akka.management</groupId>
+            <artifactId>akka-management-cluster-bootstrap_${scala.binary.version}</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.akka.discovery</groupId>
+            <artifactId>akka-discovery-dns_${scala.binary.version}</artifactId>
+        </dependency>
+        <!-- for reactive-lib kubernetes api -->
+        <dependency>
+            <groupId>com.lightbend.lagom</groupId>
+            <artifactId>api-tools_${scala.binary.version}</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.rp</groupId>
+            <artifactId>reactive-lib-akka-cluster-bootstrap_${scala.binary.version}</artifactId>
+        </dependency>
+        <!-- reactive-lib service locator -->
+        <dependency>
+            <groupId>com.lightbend.rp</groupId>
+            <artifactId>reactive-lib-service-discovery-lagom14-java_${scala.binary.version}</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -57,6 +84,22 @@
                 <artifactId>lagom-maven-plugin</artifactId>
                 <configuration>
                     <lagomService>true</lagomService>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <configuration>
+                    <skip>false</skip>
+                    <images>
+                        <image>
+                            <build>
+                                <entryPoint>
+                                    java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -cp '/maven/*' play.core.server.ProdServerStart
+                                </entryPoint>
+                            </build>
+                        </image>
+                    </images>
                 </configuration>
             </plugin>
         </plugins>
