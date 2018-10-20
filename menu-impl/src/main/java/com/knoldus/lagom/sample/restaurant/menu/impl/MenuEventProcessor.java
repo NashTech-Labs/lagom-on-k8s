@@ -1,4 +1,4 @@
-package com.knoldus.lagom.sample.restaurant.menu;
+package com.knoldus.lagom.sample.restaurant.menu.impl;
 
 import akka.Done;
 import com.datastax.driver.core.BoundStatement;
@@ -13,8 +13,7 @@ import org.pcollections.PSequence;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
-public final class MenuEventProcessor extends ReadSideProcessor<MenuEvent> {
-
+final class MenuEventProcessor extends ReadSideProcessor<MenuEvent> {
     private final CassandraSession cassandraSession;
     private final CassandraReadSide cassandraReadSide;
 
@@ -31,20 +30,19 @@ public final class MenuEventProcessor extends ReadSideProcessor<MenuEvent> {
         return cassandraReadSide.<MenuEvent>builder("menu_offset")
                 .setGlobalPrepare(this::createTable)
                 .setPrepare(tag -> prepareInsertItem())
-                .setEventHandler(MenuEvent.ItemAdded.class, event -> insertItem(event.getItem()))
                 .build();
     }
 
     @Override
     public PSequence<AggregateEventTag<MenuEvent>> aggregateTags() {
-        return null;
+        return MenuEvent.TAG.allTags();
     }
 
     private CompletionStage<Done> createTable() {
         return cassandraSession.executeCreateTable(
                 "CREATE TABLE IF NOT EXISTS menu ("
-                        + "name text"
-                        + "PRIMARY KEY name)");
+                        + "name text PRIMARY KEY"
+                        + ")");
     }
 
     private CompletionStage<Done> prepareInsertItem() {
@@ -55,8 +53,7 @@ public final class MenuEventProcessor extends ReadSideProcessor<MenuEvent> {
                 });
     }
 
-    private CompletionStage<List<BoundStatement>> insertItem(Item item) {
-        return CassandraReadSide.completedStatement(insertItem.bind(item.getName()));
+    private CompletionStage<List<BoundStatement>> insertItem(String message) {
+        return CassandraReadSide.completedStatement(insertItem.bind(message));
     }
-
 }
