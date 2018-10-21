@@ -30,6 +30,7 @@ final class MenuEventProcessor extends ReadSideProcessor<MenuEvent> {
         return cassandraReadSide.<MenuEvent>builder("menu_offset")
                 .setGlobalPrepare(this::createTable)
                 .setPrepare(tag -> prepareInsertItem())
+                .setEventHandler(MenuEvent.ItemAdded.class, evt -> insertItem(evt.getItem().getName()))
                 .build();
     }
 
@@ -53,7 +54,7 @@ final class MenuEventProcessor extends ReadSideProcessor<MenuEvent> {
                 });
     }
 
-    private CompletionStage<List<BoundStatement>> insertItem(String message) {
-        return CassandraReadSide.completedStatement(insertItem.bind(message));
+    private CompletionStage<List<BoundStatement>> insertItem(String name) {
+        return CassandraReadSide.completedStatement(insertItem.bind(name));
     }
 }

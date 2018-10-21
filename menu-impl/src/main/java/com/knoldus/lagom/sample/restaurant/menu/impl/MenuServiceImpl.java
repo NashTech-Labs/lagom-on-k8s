@@ -1,5 +1,6 @@
 package com.knoldus.lagom.sample.restaurant.menu.impl;
 
+import akka.Done;
 import akka.NotUsed;
 import com.google.inject.Inject;
 import com.knoldus.lagom.sample.restaurant.menu.api.Item;
@@ -19,8 +20,8 @@ class MenuServiceImpl implements MenuService {
 
   @Inject
   MenuServiceImpl(final PersistentEntityRegistry persistentEntityRegistry,
-                         final CassandraSession cassandraSession,
-                         final ReadSide readSide) {
+                  final CassandraSession cassandraSession,
+                  final ReadSide readSide) {
     this.persistentEntityRegistry = persistentEntityRegistry;
     persistentEntityRegistry.register(MenuEntity.class);
 
@@ -30,12 +31,17 @@ class MenuServiceImpl implements MenuService {
   }
 
   @Override
-  public ServiceCall<NotUsed, List<Item>> getMenu() {
+  public ServiceCall<NotUsed, List<String>> getMenu() {
     return request ->
             cassandraSession.selectAll("select * from menu")
                     .thenApply(rows ->
-                            rows.stream().map(row ->
-                                    Item.builder().name(row.getString("name")).build())
-                                    .collect(Collectors.toList()));
+                            rows.stream().map(row -> row.getString("name")).collect(Collectors.toList()));
+  }
+
+  @Override
+  public ServiceCall<Item, Done> addItem() {
+    return request ->
+            persistentEntityRegistry.refFor(MenuEntity.class, request.getName())
+                    .ask(MenuCommand.AddItem.builder().item(request).build());
   }
 }
