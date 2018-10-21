@@ -18,6 +18,7 @@ final class MenuEventProcessor extends ReadSideProcessor<MenuEvent> {
     private final CassandraReadSide cassandraReadSide;
 
     private PreparedStatement insertItem;
+    private PreparedStatement deleteItem;
 
     @Inject
     private MenuEventProcessor(final CassandraSession cassandraSession, final CassandraReadSide cassandraReadSide) {
@@ -29,8 +30,10 @@ final class MenuEventProcessor extends ReadSideProcessor<MenuEvent> {
     public ReadSideHandler<MenuEvent> buildHandler() {
         return cassandraReadSide.<MenuEvent>builder("menu_offset")
                 .setGlobalPrepare(this::createTable)
-                .setPrepare(tag -> prepareInsertItem())
+                .setPrepare(tag -> prepareInsertItem()
+                        .thenCompose(done -> prepareDeleteItem()))
                 .setEventHandler(MenuEvent.ItemAdded.class, evt -> insertItem(evt.getItem().getName()))
+                .setEventHandler(MenuEvent.ItemDeleted.class, evt -> deleteItem(evt.getItem().getName()))
                 .build();
     }
 
@@ -48,13 +51,25 @@ final class MenuEventProcessor extends ReadSideProcessor<MenuEvent> {
 
     private CompletionStage<Done> prepareInsertItem() {
         return cassandraSession.prepare("INSERT INTO menu (name) VALUES (?)")
-                .thenApply(s -> {
-                    insertItem = s;
+                .thenApply(preparedStatement -> {
+                    insertItem = preparedStatement;
+                    return Done.getInstance();
+                });
+    }
+
+    private CompletionStage<Done> prepareDeleteItem() {
+        return cassandraSession.prepare("DELETE FROM menu WHERE name=?")
+                .thenApply(preparedStatement -> {
+                    deleteItem = preparedStatement;
                     return Done.getInstance();
                 });
     }
 
     private CompletionStage<List<BoundStatement>> insertItem(String name) {
         return CassandraReadSide.completedStatement(insertItem.bind(name));
+    }
+
+    private CompletionStage<List<BoundStatement>> deleteItem(String name) {
+        return CassandraReadSide.completedStatement(deleteItem.bind(name));
     }
 }

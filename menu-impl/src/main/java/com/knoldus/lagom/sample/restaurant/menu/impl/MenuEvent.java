@@ -24,4 +24,11 @@ interface MenuEvent extends Jsonable, AggregateEvent<MenuEvent> {
   final class ItemAdded implements MenuEvent {
     private final Item item;
   }
+
+  @Value
+  @Builder
+  @JsonDeserialize
+  final class ItemDeleted implements MenuEvent {
+    private final Item item;
+  }
 }

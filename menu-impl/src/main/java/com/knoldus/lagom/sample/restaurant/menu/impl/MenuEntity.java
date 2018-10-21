@@ -15,6 +15,10 @@ final class MenuEntity extends PersistentEntity<MenuCommand, MenuEvent, MenuStat
             ctx.thenPersist(MenuEvent.ItemAdded.builder().item(cmd.getItem()).build(), evt ->
                     ctx.reply(Done.getInstance())));
 
+    behaviorBuilder.setCommandHandler(MenuCommand.DeleteItem.class, (cmd, ctx) ->
+            ctx.thenPersist(MenuEvent.ItemDeleted.builder().item(cmd.getItem()).build(), evt ->
+                    ctx.reply(Done.getInstance())));
+
     return behaviorBuilder.build();
   }
 }

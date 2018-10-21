@@ -44,4 +44,11 @@ class MenuServiceImpl implements MenuService {
             persistentEntityRegistry.refFor(MenuEntity.class, request.getName())
                     .ask(MenuCommand.AddItem.builder().item(request).build());
   }
+
+  @Override
+  public ServiceCall<Item, Done> deleteItem() {
+    return request ->
+            persistentEntityRegistry.refFor(MenuEntity.class, request.getName())
+                    .ask(MenuCommand.DeleteItem.builder().item(request).build());
+  }
 }

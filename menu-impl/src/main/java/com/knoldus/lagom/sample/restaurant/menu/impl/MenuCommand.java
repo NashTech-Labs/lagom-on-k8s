@@ -16,4 +16,11 @@ interface MenuCommand extends Jsonable {
     final class AddItem implements MenuCommand, CompressedJsonable, PersistentEntity.ReplyType<Done> {
         private final Item item;
     }
+
+    @Value
+    @Builder
+    @JsonDeserialize
+    final class DeleteItem implements MenuCommand, CompressedJsonable, PersistentEntity.ReplyType<Done> {
+        private final Item item;
+    }
 }
