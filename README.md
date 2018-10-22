@@ -12,43 +12,19 @@ You'll need to ensure that the following software is installed:
 * [kubectl](https://kubernetes-cn.github.io/docs/tasks/tools/install-kubectl/)
 * [Minikube](https://github.com/kubernetes/minikube/releases) v0.28.2 or later (Verify with `minikube version`)
 
-### Choose Deployment Type
-
-Once you've set up your environment, you can deploy Restaurant to Kubernetes. The steps differ depending on whether you want to deploy in a development or production environment.
-
-During development, it is simpler to deploy all services with a single sbt task. The *Development Workflow* section describes how to do this. It will build Docker images for each subproject, generate Kubernetes YAML, and deploy them into your Minikube using `kubectl`.
-
-The *Operations Workflow* section describes the steps for deploying in a production environment. You will use sbt to build the images. The [reactive-cli](https://github.com/lightbend/reactive-cli) is then used to generate YAML for deployment to the Kubernetes cluster. Because the production environment is more complex, additional steps are required as described below.
-
 ### Build & Deploy
 
 #### 1. Environment Preparation
 
-##### Install reactive-cli
-
-See [Lightbend Orchestration for Kubernetes Documentation](https://developer.lightbend.com/docs/lightbend-orchestration-kubernetes/latest/cli-installation.html#install-the-cli)
-
-Ensure you're using `reactive-cli` 0.9.0 or newer. You can check the version with `rp version`.
-
 ##### Start minikube
 
-> If you have an existing Minikube, you can delete your old one start fresh via `minikube delete`
+> You can start the Minikube by following command:
 
-##### Enable Ingress Controller
-
-```bash
-minikube addons enable ingress
+```
+(minikube delete || true) &>/dev/null && minikube start --memory 4096 && eval $(minikube docker-env)
 ```
 
-```bash
-minikube start --memory 6000
-```
-
-##### Setup Docker engine context to point to Minikube
-
-```bash
-eval $(minikube docker-env)
-```
+**Note**: It will also setup Docker engine context to point to Minikube
 
 #### 2a. Development Workflow
 
