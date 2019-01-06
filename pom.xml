@@ -12,6 +12,8 @@
     <modules>
         <module>menu-api</module>
         <module>menu-impl</module>
+        <module>order-api</module>
+        <module>order-impl</module>
     </modules>
 
     <build>
