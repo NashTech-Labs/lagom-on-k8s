@@ -13,7 +13,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.pcollections.PSequence;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
@@ -51,14 +55,14 @@ final class OrderEventProcessor extends ReadSideProcessor<OrderEvent> {
 
     private CompletionStage<Done> createTable() {
         return cassandraSession.executeCreateTable(
-                "CREATE TABLE IF NOT EXISTS order ("
+                "CREATE TABLE IF NOT EXISTS orders ("
                         + "id text PRIMARY KEY,"
-                        + "items set<text>"
+                        + "items text"
                         + ")");
     }
 
     private CompletionStage<Done> prepareInsertItem() {
-        return cassandraSession.prepare("INSERT INTO order (id, items) VALUES (?)")
+        return cassandraSession.prepare("INSERT INTO orders (id, items) VALUES (?, ?)")
                 .thenApply(preparedStatement -> {
                     insertOrder = preparedStatement;
                     return Done.getInstance();
@@ -66,14 +70,12 @@ final class OrderEventProcessor extends ReadSideProcessor<OrderEvent> {
     }
 
     private CompletionStage<List<BoundStatement>> insertOrder(OrderEvent.OrderPlaced orderPlaced) {
-        return CassandraReadSide.completedStatement(insertOrder.bind(orderPlaced.getId())
-                .bind(orderPlaced.getItems().stream().map(item -> {
-                    try {
-                        return objectMapper.writeValueAsString(item);
-                    } catch (Exception ex) {
-                        LOGGER.error("Caught exception while placing order: " + orderPlaced.getId(), ex);
-                        return StringUtils.EMPTY;
-                    }
-                }).collect(Collectors.toList())));
+        try {
+            return CassandraReadSide.completedStatement(insertOrder.bind(orderPlaced.getId(),
+                    objectMapper.writeValueAsString(orderPlaced.getItems())));
+        } catch (Exception ex) {
+            LOGGER.error("Caught exception while placing order: " + orderPlaced.getId(), ex);
+            return CompletableFuture.completedFuture(Collections.emptyList());
+        }
     }
 }
