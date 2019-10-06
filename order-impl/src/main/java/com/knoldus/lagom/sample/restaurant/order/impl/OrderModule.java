@@ -28,6 +28,7 @@ public final class OrderModule extends AbstractModule implements ServiceGuiceSup
     }
 
     bindService(OrderService.class, OrderServiceImpl.class);
+    bindClient(MenuService.class);
   }
 
   static class AkkaManagerAndClusterStarter {

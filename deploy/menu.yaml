@@ -6,7 +6,7 @@ metadata:
   labels:
     app: menu
 spec:
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:
